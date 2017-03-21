@@ -1,4 +1,4 @@
-import { Component, ViewChild, Input } from '@angular/core';
+import { Component, ViewChild, Input, Output, EventEmitter } from '@angular/core';
 import {BoardPoint} from './boardpoint'
 @Component({
   selector: 'board-point',
@@ -7,4 +7,10 @@ import {BoardPoint} from './boardpoint'
 })
 export class PointComponent{
       @Input() model:BoardPoint;
+      @Output() onChanged = new EventEmitter<BoardPoint>();
+
+                   clicked(event){
+                   this.onChanged.emit(this.model);
+                   };
+
 }

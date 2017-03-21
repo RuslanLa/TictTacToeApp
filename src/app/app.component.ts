@@ -17,5 +17,6 @@ export class AppComponent {
   public board:Board;
     ngOnInit() { 
       this.user.UserName="Ваня"; 
+      this.board.bindUser(this.user);
     }
 }

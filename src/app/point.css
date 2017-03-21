@@ -1,3 +1,4 @@
 .point{
-    border: 1px solid darkblue;
+    /*border: 1px solid darkblue;*/
+    padding-bottom: 10px;
 }
