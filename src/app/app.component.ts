@@ -1,5 +1,6 @@
 import { Component, ViewChild } from '@angular/core'; 
-import {User} from "./user"
+import {User} from "./user";
+import {Board} from './board';
 
 @Component({
   selector: 'app-root',
@@ -12,6 +13,8 @@ export class AppComponent {
   @ViewChild('playerUser')
   public user:User;
 
+  @ViewChild('board')
+  public board:Board;
     ngOnInit() { 
       this.user.UserName="Ваня"; 
     }

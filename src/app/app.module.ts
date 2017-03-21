@@ -6,12 +6,15 @@ import { HttpModule } from '@angular/http';
 import { AppComponent } from './app.component';
 import {User} from './user'
 import {GameStat} from './gamestat'
-
+import {Board} from './board'
+import {PointComponent} from './pointcomponent'
 @NgModule({
   declarations: [
     AppComponent,
     User,
-    GameStat
+    GameStat,
+    Board,
+    PointComponent
   ],
   imports: [
     BrowserModule,

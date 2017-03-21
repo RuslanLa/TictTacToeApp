@@ -1,0 +1,6 @@
+    <div class="container">
+       <div class="row" *ngFor="let row of Points">
+         <board-point *ngFor="let point of row" [model]="point">
+         </board-point>
+       </div> 
+    </div>
