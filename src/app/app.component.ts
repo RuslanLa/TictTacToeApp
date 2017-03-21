@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild } from '@angular/core'; 
+import {User} from "./user"
 
 @Component({
   selector: 'app-root',
@@ -6,5 +7,12 @@ import { Component } from '@angular/core';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  title = 'app works!';
+  title = 'Tic tac toe game!';
+ 
+  @ViewChild('playerUser')
+  public user:User;
+
+    ngOnInit() { 
+      this.user.UserName="Ваня"; 
+    }
 }
