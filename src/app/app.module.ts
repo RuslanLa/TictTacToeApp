@@ -4,25 +4,34 @@ import { FormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
 
 import { AppComponent } from './app.component';
-import {User} from './user'
-import {GameStat} from './gamestat'
-import {Board} from './board'
-import {PointComponent} from './pointcomponent'
+import { BoardComponent } from './board.component'
+import { PointComponent } from './point.component'
+import { TicTacProcessorComponent } from './tictacprocessor.component'
+import { GameRibbonComponent } from './gameribbon.component'
+import { UserProfileComponent } from './user-profile.component'
+import { BoardService } from "./board.service";
+import { GameService } from "./game.service";
+import { LockerService } from "./locker.service";
+import { MatrixService } from "./matrix.service";
+import { ParticipiantsService } from "./participiants.service";
+import { RandomService } from "./random.service";
+import { UserService } from "./user.service";
 @NgModule({
   declarations: [
     AppComponent,
-    User,
-    GameStat,
-    Board,
-    PointComponent
+    BoardComponent,
+    PointComponent,
+    TicTacProcessorComponent,
+    GameRibbonComponent,
+    UserProfileComponent
   ],
   imports: [
     BrowserModule,
     FormsModule,
     HttpModule
   ],
-  providers: [],
+  providers: [RandomService,  UserService, LockerService, MatrixService, BoardService, GameService, ParticipiantsService],
   bootstrap: [AppComponent]
 })
-export class AppModule { 
+export class AppModule {
 }

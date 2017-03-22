@@ -1,0 +1,7 @@
+<div *ngIf="Show">
+    <select class="selectpicker" [(ngModel)]="userMark">
+  <option value="X">X</option>
+  <option value="O">O</option>
+</select>
+    <button class="btn btn-primary" (click)="Clicked($event)">Start</button>
+</div>

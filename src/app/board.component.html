@@ -1,0 +1,7 @@
+<div class="col-xs-2"></div>
+<div class="container board col-xs-5">
+  <div class="row" *ngFor="let row of data.Points">
+    <board-point *ngFor="let point of row" [model]="point" (onChanged)="Clicked(point, false);">
+    </board-point>
+  </div>
+</div>

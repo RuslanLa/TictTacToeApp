@@ -1,104 +1,140 @@
-import { Component, ViewChild, Input, Output, EventEmitter } from '@angular/core';
-import { PointComponent } from './pointcomponent';
+import { EventEmitter } from '@angular/core';
 import { BoardPoint } from './boardpoint';
 import { IParticipiant } from './iparticipant'
 import { User } from './user';
 import { Game } from './game';
-@Component({
-    selector: 'board',
-    templateUrl: './board.html',
-    styleUrls: ['./board.css'],
-})
+import { LockerService } from './locker.service';
+import { MatrixService } from "./matrix.service";
+import { GameService } from "app/game.service";
+
+/**Доска */
 export class Board {
-    Points: BoardPoint[][];
-    private _participiants: IParticipiant[];
-    private _user: User;
-    private _game: Game;
-    private _lock: boolean = false;
-   @Output() onFinished = new EventEmitter();
-    Combinations:BoardPoint[][]
-    ngOnInit() {
-        this.Points=[];
-        for (var i = 0; i < 3; i++) {
-            this.Points[i] = [];
-            for (var j = 0; j < 3; j++) {
-                this.Points[i][j] = new BoardPoint(i, j);
+
+    constructor(private locker: LockerService, private matrixService: MatrixService, private gameService:GameService) {
+
+    }
+    /**Точки доски */
+    private _points: BoardPoint[][] = [];
+
+    /**Точки доски */
+    get Points(): BoardPoint[][] {
+        if (this._points == null || this._points.length == 0) {
+            for (var i = 0; i < 3; i++) {
+                this._points[i] = [];
+                for (var j = 0; j < 3; j++) {
+                    this._points[i][j] = new BoardPoint(i, j);
+                }
             }
         }
 
-        this.Combinations=this.getAllCombinations();
+        return this._points;
     }
 
-    hasGame(){
-        return this._game!==null;
-    }
+    /**Событие на завершение игры */
+    private _onFinished: EventEmitter<any>;
 
-    bindUser(user: User, mark:string) {
-        this._user = user;
-        this._game = new Game(user, this, mark);
-        this.clear();
-        var currentParticipiant=this._game.GetCurrent();
-        currentParticipiant.Step();
-    }
-
-    getAllCombinations():BoardPoint[][]{
-          var combinations=[this.getDiagonal(true), this.getDiagonal(false)];
-          for(var i=0; i<this.Points.length; i++){
-              combinations.push(this.Points[i]);
-              var column=[];
-              for(var j=0; j<this.Points.length; j++){
-                  column.push(this.Points[j][i]);
-              }
-              combinations.push(column);
-          }
-          return combinations;
-    }
-
-    clicked(point: BoardPoint, isManually:boolean) {
-        if (point.IsSelected || this._user == null || this._game == null || this._lock) {
-            return;
+    /**Событие на завершение игры */
+    set OnFinished(value: EventEmitter<any>) {
+        if (value == null) {
+            throw "EventEmitter onfinished cannot be null";
         }
-        this._lock = true;
-        var currentParticipiant = this._game.GetCurrent();
-        if (!currentParticipiant.IsAlive&&!isManually) {
-            this._lock = false;
-            return;
+        this._onFinished = value;
+    }
+
+    /**Событие на завершение игры */
+    get OnFinished(): EventEmitter<any> {
+        if (this._onFinished == null) {
+            throw "EventEmitter onfinished is null";
         }
-        point.IsSelected = true;
-        point.Mark = currentParticipiant.Mark;
-        var isWon = this.checkIsWon(point);
-        var isStandoff = this.checkIsStandoff();
-        if (isWon || isStandoff) {
-            if (isWon) {
-                this._game.Win();
+        return this._onFinished;
+    }
+
+    /**Возможные комбинации */
+    private _combinations: BoardPoint[][] = [];
+
+
+    /**Возможные комбинации */
+    get Combinations(): BoardPoint[][] {
+        if (this._combinations == null || this._combinations.length == 0) {
+            this._combinations = this.GetAllCombinations();
+        }
+
+        return this._combinations;
+    }
+
+    /**Привязка пользователя к доске */
+    BindUser() {
+        this.gameService.StartNew();
+        if(this.gameService.Game==null){
+            throw "Game is empty";
+        }
+        this.Сlear();
+        var currentParticipiant = this.gameService.Game.GetCurrent();
+        currentParticipiant.Step(this);
+    }
+
+    /**Возвращает все возможные комбинации */
+    private GetAllCombinations(): BoardPoint[][] {
+        var combinations = [this.matrixService.GetDiagonal<BoardPoint>(true, this.Points), this.matrixService.GetDiagonal<BoardPoint>(false, this.Points)];
+        for (var i = 0; i < this.Points.length; i++) {
+            combinations.push(this.Points[i]);
+            var column = [];
+            for (var j = 0; j < this.Points.length; j++) {
+                column.push(this.Points[j][i]);
             }
-            else {
-                this._game.Standoff();
-            }
-            this._game=null;
-            this.onFinished.emit();
-            return;
+            combinations.push(column);
         }
-        this._lock = false;
-        this._game.NextStep();
+        return combinations;
     }
 
-    clear() {
+    /**Обработчик хода */
+    Step(point: BoardPoint, isManually: boolean) {
+        if (point == null || point.IsSelected || this.gameService.Game == null || this.locker.IsLocked) {
+            return;
+        }
+        //Наложение блокировки на повторное нажатие 
+        this.locker.SetLock();
+        /**Получение текущего пользователя */
+        var currentParticipiant = this.gameService.Game.GetCurrent();
+
+        //Если текущий участник игры не живой игрок и ход выполнен не программно
+        //- ход не считается
+        if (!currentParticipiant.IsAlive && !isManually) {
+            this.locker.Unlock();
+            return;
+        }
+        point.Choose(currentParticipiant.Mark);
+
+        //Проверка что игра закончилась
+        if (this.CheckIsEnd(point)) {
+            return;
+        }
+
+        //Разблокировка
+        this.locker.Unlock();
+
+        //Переход к следующему шагу
+        this.gameService.Game.NextStep(this);
+    }
+
+    /**Очистка  поля*/
+    private Сlear() {
         for (var i = 0; i < this.Points.length; i++) {
             for (var j = 0; j < this.Points.length; j++) {
-                this.Points[i][j].IsSelected = false;
-                this.Points[i][j].Mark = "blank"
+                this.Points[i][j].Clear();
             }
         }
-        this._lock = false;
+        this.locker.Unlock();
     }
 
-    checkIsStandoff():boolean {
-        return this._game.stepsCount === (this.Points.length * this.Points.length - 1);
+    /**Проверка что игра закончилась ничьей */
+    private СheckIsStandoff(): boolean {
+        return this.gameService.Game.stepsCount === (this.Points.length * this.Points.length - 1);
     }
 
-    checkIsWon(point: BoardPoint): boolean {
-        var checked = this.checkLine(this.Points[point.Horizontal], point.Mark);
+    /**Проверка что шаг привел к победе */
+    private CheckIsWon(point: BoardPoint): boolean {
+        var checked = this.CheckLine(this.Points[point.Horizontal], point.Mark);
         if (checked) {
             return true;
         }
@@ -106,39 +142,45 @@ export class Board {
         for (var i = 0; i < this.Points.length; i++) {
             column.push(this.Points[i][point.Vertical]);
         }
-        checked = this.checkLine(column, point.Mark);
-        return checked || this.checkDiagonal(point, true) || this.checkDiagonal(point, false);
+        checked = this.CheckLine(column, point.Mark);
+        return checked || this.CheckDiagonal(point, true) || this.CheckDiagonal(point, false);
     }
 
-    checkLine(points: BoardPoint[], mark: string): boolean {
-        return points.every((value: BoardPoint) => {
+    /**Проверка что игра закончилась */
+    private CheckIsEnd(point: BoardPoint): boolean {
+        var isWon = this.CheckIsWon(point);
+        var isStandoff = this.СheckIsStandoff();
+        if (!isWon && !isStandoff) {
+            return false;
+        }
+
+        if (isWon) {
+            this.gameService.Game.Win();
+        }
+        else {
+            this.gameService.Game.Standoff();
+        }
+        this.gameService.EndGame();
+        this.OnFinished.emit();
+
+        return true;
+    }
+
+    /**Проверка что массив заполнен одним знаком */
+    CheckLine(points: BoardPoint[], mark: string): boolean {
+        return this.matrixService.CheckLine<BoardPoint>(points, (value: BoardPoint) => {
             return value.Mark === mark;
         });
     }
 
-    getDiagonal(isMain: boolean):BoardPoint[]{
-        var result=[];
-        for (var i = 0; i < this.Points.length; i++) {
-            var j = isMain ? i : (this.Points.length - 1 - i);
-            result.push(this.Points[i][j]);
-        }
-
-        return result;
-    }
-
-    checkDiagonal(boardpoint: BoardPoint, isMain: boolean): boolean {
+    /**Проверка что диагональ заполнена одним знаком */
+    CheckDiagonal(boardpoint: BoardPoint, isMain: boolean): boolean {
         var vertical = isMain ? boardpoint.Vertical : (this.Points.length - 1 - boardpoint.Vertical)
         if (boardpoint.Horizontal !== vertical) {
             return false;
         }
 
-        for (var i = 0; i < this.Points.length; i++) {
-            var j = isMain ? i : (this.Points.length - 1 - i);
-            if (this.Points[i][j].Mark != boardpoint.Mark) {
-                return false;
-            }
-        }
-
-        return true;
+        return this.matrixService.СheckDiagonal<BoardPoint>(this.Points, isMain,
+            (value: BoardPoint) => value.Mark === boardpoint.Mark);
     }
 }

@@ -1,0 +1,5 @@
+<!--Информация о пользователе (статистика)-->
+<user-profile [data]="User" #playerUser></user-profile>
+<ribbon (OnStart)="start($event)" [Show]="!isProcessing"></ribbon>
+<board (onFinished)="onGameEnded()" [data]="Board"></board>
+<!--<board  [data]="Board"></board>-->

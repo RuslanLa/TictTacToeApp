@@ -2,18 +2,20 @@ import { Board } from './board'
 import { IParticipiant } from './iparticipant'
 import { User } from './user'
 import { Player } from './player'
-import { Ai } from './ai'
+import { TicTacAi } from './tictac_ai'
+import { UserService } from "./user.service";
+import { BoardService } from "./board.service";
+import { ParticipiantsService } from "./participiants.service";
 export class Game {
       participiants: IParticipiant[];
       stepsCount: number = 0;
-      constructor(user: User, board:Board, userMark:string) {
-            var aiMark=userMark==="X"?"O":"X";
-            this.participiants = [new Player(user, userMark), new Ai(aiMark, this, board)].sort((a)=>a.Mark=="X"?0:1);
+      constructor(private participiantsService:ParticipiantsService) {
+            this.participiants = participiantsService.GetParticipiants(this);
       }
-      NextStep() {
+      NextStep(board:Board) {
             this.stepsCount++;
             var current = this.GetCurrent();
-            current.Step();
+            current.Step(board);
       }
 
       Win() {
