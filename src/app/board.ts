@@ -14,7 +14,6 @@ export class Board {
     private _marks: string[] = ["X", "O"];
     private _participiants: IParticipiant[];
     private i: number = 0;
-    private _checkedCount: number = 0;
     private _user: User;
     private _game: Game;
     private _lock: boolean = false;
@@ -71,17 +70,16 @@ export class Board {
         }
         point.IsSelected = true;
         point.Mark = currentParticipiant.Mark;
-        this._checkedCount++;
         var isWon = this.checkIsWon(point);
         var isStandoff = this.checkIsStandoff();
         if (isWon || isStandoff) {
-            this.clear();
             if (isWon) {
                 this._game.Win();
             }
             else {
                 this._game.Standoff();
             }
+            this.clear();
             return;
         }
         this._lock = false;

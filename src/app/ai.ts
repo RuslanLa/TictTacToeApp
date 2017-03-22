@@ -48,8 +48,6 @@ export class Ai implements IParticipiant {
                     notSelected.push(curPoint);
                     continue;
                 }
-                if (xCount === 1 || oCount === 1) { }
-                result = empty;
                 if (combinations[i][j].Mark == "X") {
                     xCount++;
                     continue;
@@ -58,8 +56,13 @@ export class Ai implements IParticipiant {
             }
             var isX = this.Mark === "X";
             var curCount = isX ? xCount : oCount;
-            if (curCount == 2) {
+            var otherCount=isX?oCount:xCount;
+            if (curCount === 2&&otherCount===0) {
                 return empty;
+            }
+
+            if(otherCount===2&&curCount===0){
+                result=empty;
             }
         }
 

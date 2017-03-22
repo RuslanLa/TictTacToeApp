@@ -11,7 +11,6 @@ export class User{
        gameStat:GameStat;
 
         ngOnInit() { 
-      this.gameStat.win();
     }
     
 }
