@@ -5,7 +5,7 @@ import { User } from './user';
 import { Game } from './game';
 import { LockerService } from './locker.service';
 import { MatrixService } from "./matrix.service";
-import { GameService } from "app/game.service";
+import { GameService } from "./game.service";
 
 /**Доска */
 export class Board {
