@@ -6,8 +6,9 @@ import { Ai } from './ai'
 export class Game {
       participiants: IParticipiant[];
       stepsCount: number = 0;
-      constructor(user: User, board:Board) {
-            this.participiants = [new Player(user, "X"), new Ai("O", this, board)];
+      constructor(user: User, board:Board, userMark:string) {
+            var aiMark=userMark==="X"?"O":"X";
+            this.participiants = [new Player(user, userMark), new Ai(aiMark, this, board)].sort((a)=>a.Mark=="X"?0:1);
       }
       NextStep() {
             this.stepsCount++;

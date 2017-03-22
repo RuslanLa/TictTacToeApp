@@ -15,8 +15,21 @@ export class AppComponent {
 
   @ViewChild('board')
   public board:Board;
+  
+  public userMark:string="X";
+
+  isProcessing:boolean=false;
     ngOnInit() { 
       this.user.UserName="Ваня"; 
-      this.board.bindUser(this.user);
+    }
+
+    start(){
+      debugger;
+      this.board.bindUser(this.user, this.userMark);
+      this.isProcessing=true;
+    }
+    onGameEnded(){
+      debugger;
+      this.isProcessing=false;
     }
 }

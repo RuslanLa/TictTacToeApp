@@ -1,4 +1,4 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild, Input, Output, EventEmitter } from '@angular/core';
 import { PointComponent } from './pointcomponent';
 import { BoardPoint } from './boardpoint';
 import { IParticipiant } from './iparticipant'
@@ -7,24 +7,18 @@ import { Game } from './game';
 @Component({
     selector: 'board',
     templateUrl: './board.html',
-    styleUrls: ['./board.css']
+    styleUrls: ['./board.css'],
 })
 export class Board {
     Points: BoardPoint[][];
-    private _marks: string[] = ["X", "O"];
     private _participiants: IParticipiant[];
-    private i: number = 0;
     private _user: User;
     private _game: Game;
     private _lock: boolean = false;
+   @Output() onFinished = new EventEmitter();
     Combinations:BoardPoint[][]
     ngOnInit() {
-        this.Points = [[]];
-        //  this.Points=[
-        //      [new PointComponent(new BoardPoint(0,0)), new PointComponent(new BoardPoint(0,1)), new PointComponent(new BoardPoint(0,2))],
-        //       [new PointComponent(new BoardPoint(1,0)), new PointComponent(new BoardPoint(1,1)), new PointComponent(new BoardPoint(1,2))],
-        //       [new PointComponent(new BoardPoint(3,0)), new PointComponent(new BoardPoint(3,1)), new PointComponent(new BoardPoint(3,2))],
-        //       ];
+        this.Points=[];
         for (var i = 0; i < 3; i++) {
             this.Points[i] = [];
             for (var j = 0; j < 3; j++) {
@@ -35,11 +29,15 @@ export class Board {
         this.Combinations=this.getAllCombinations();
     }
 
-    bindUser(user: User) {
+    hasGame(){
+        return this._game!==null;
+    }
+
+    bindUser(user: User, mark:string) {
         this._user = user;
-        this._game = new Game(user, this);
+        this._game = new Game(user, this, mark);
+        this.clear();
         var currentParticipiant=this._game.GetCurrent();
-        debugger;
         currentParticipiant.Step();
     }
 
@@ -57,8 +55,6 @@ export class Board {
     }
 
     clicked(point: BoardPoint, isManually:boolean) {
-        debugger;
-        console.log(this._game.stepsCount);
         if (point.IsSelected || this._user == null || this._game == null || this._lock) {
             return;
         }
@@ -79,7 +75,8 @@ export class Board {
             else {
                 this._game.Standoff();
             }
-            this.clear();
+            this._game=null;
+            this.onFinished.emit();
             return;
         }
         this._lock = false;
@@ -93,7 +90,6 @@ export class Board {
                 this.Points[i][j].Mark = "blank"
             }
         }
-        this._game = new Game(this._user, this);
         this._lock = false;
     }
 
