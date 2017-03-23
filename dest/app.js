@@ -73613,8 +73613,10 @@ var ParticipiantsService = (function () {
     }
     /**Создает участников */
     ParticipiantsService.prototype.GetParticipiants = function (game) {
+        debugger;
         var aiMark = this.userService.Mark === "X" ? "O" : "X";
-        return [new player_1.Player(this.userService.User, this.userService.Mark), new tictac_ai_1.TicTacAi(aiMark, game, this.randomService)].sort(function (a) { return a.Mark == "X" ? 0 : 1; });
+        var part = [new player_1.Player(this.userService.User, this.userService.Mark), new tictac_ai_1.TicTacAi(aiMark, game, this.randomService)].sort(function (a) { return a.Mark == "X" ? 0 : 1; });
+        return part;
     };
     ParticipiantsService = __decorate([
         core_1.Injectable()
