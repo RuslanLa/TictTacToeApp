@@ -17,7 +17,9 @@ export class ParticipiantsService{
 
     /**Создает участников */
     GetParticipiants(game:Game){
+        debugger;
          var aiMark=this.userService.Mark==="X"?"O":"X";
-            return [new Player(this.userService.User, this.userService.Mark), new TicTacAi(aiMark, game, this.randomService)].sort((a)=>a.Mark=="X"?0:1);
+            var part= [new Player(this.userService.User, this.userService.Mark), new TicTacAi(aiMark, game, this.randomService)].sort((a)=>a.Mark=="X"?0:1);
+            return part;
     }
 }
