@@ -31,7 +31,7 @@ export class GameRibbonComponent {
     @Input() Show: boolean;
 
     /**Обработчик нажатия кнопки начала игры */
-    Clicked(event) {
+    clicked(event) {
         debugger;
         if (this.userMark == null) {
             event.preventDefault();
