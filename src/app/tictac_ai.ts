@@ -94,9 +94,20 @@ export class TicTacAi implements IParticipiant {
     /**Возвращает точку для первых действий */
     private GetPriorityPoint(board:Board): BoardPoint {
         var priority = [0, 2];
+        var point:BoardPoint=null;
+        var checker=0;
+        while((point==null||(point.IsSelected))&&checker<4){
+            checker++;
         var i = this.randomService.GetRandomInt(0, 1);
         var j = this.randomService.GetRandomInt(0, 1);
-        return board.Points[priority[i]][priority[j]];
+         point= board.Points[priority[i]][priority[j]];
+        }
+
+        if(point==null){
+            throw "Something is going wrong. Cannot find priority point";
+        }
+
+        return point;
     }
 
     /**Обработчик победы
